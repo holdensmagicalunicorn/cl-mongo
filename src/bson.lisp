@@ -35,29 +35,29 @@ clashed with the encoding for booleans..
 
 (defun set-array-length (array &key (start 0 start-supplied-p))
   (let* ((head (if start-supplied-p
-                   start (fill-pointer array)))) ; save the stack pointer
-    (set-octets head (int32-to-octet (- (length array) head) ) array))) ; set length
+                   start (fill-pointer array)))) ;; save the stack pointer
+    (set-octets head (int32-to-octet (- (length array) head))
+                array))) ;; set length
 
 (defun make-array-null-terminated (array)
   (add-octets (byte-to-octet 0) array))
 
-(defgeneric bson-encode(key value &key )
-  (:documentation "encode a bson data element"))
+(defgeneric bson-encode (key value &key )
+  (:documentation "Encode a bson-data element."))
 
-(defmethod bson-encode( (key string) (value t) &key array type encoder)
-  ;(format t "89here~%")
-  (let* ((head  (fill-pointer array)))                         ; save the stack pointer
-    (add-octets (int32-to-octet 0)    array)                   ; length, set to zero
-    (add-octets (byte-to-octet  type) array)                   ; data element code
-    (add-octets (string-to-null-terminated-octet key) array)   ; key
-    (funcall encoder array)                                    ; call type specific encoder
-    (add-octets (byte-to-octet 0) array)                       ; ending nul
-    (set-octets head (int32-to-octet (- (length array) head) ) array)      ; set length    
+(defmethod bson-encode((key string) (value t) &key array type encoder)
+  (let* ((head (fill-pointer array)))        ;; save the stack pointer
+    (add-octets (int32-to-octet 0)    array) ;; length, set to zero
+    (add-octets (byte-to-octet  type) array) ;; data element code
+    (add-octets (string-to-null-terminated-octet key) array) ;; key
+    (funcall encoder array)              ;; call type specific encoder
+    (add-octets (byte-to-octet 0) array) ;; ending null
+    (set-octets head (int32-to-octet (- (length array) head)) array) ;; set
+                                                                     ;; length
     array))
 
-		  
-;;; empty object
-(defmethod bson-encode( (key (eql nil)) (value (eql nil)) &key (array nil))
+;;; Empty object
+(defmethod bson-encode((key (eql nil)) (value (eql nil)) &key (array nil))
   (let ((array (or array (make-octet-vector +default-array-size+))))
     (add-octets (int32-to-octet 0)    array)                   ; length, set to zero
     (add-octets (byte-to-octet 0)     array)                  ; ending nul

@@ -1,7 +1,7 @@
 (in-package :cl-mongo)
 
-(defconstant +max-uint32+ 4294967296           "max + 1 value of unsigned 32 bit integer")
-(defconstant +max-uint64+ 18446744073709551616 "max + 1 value of unsigned 64 bit integer")
+(defconstant +max-uint32+ 4294967296)
+(defconstant +max-uint64+ 18446744073709551616)
 
 (defun make-octet-vector(sz &key (init-fill 0) )
   (make-array sz :element-type '(unsigned-byte 8) :initial-element 0 :fill-pointer init-fill :adjustable t))
@@ -30,7 +30,7 @@
       (vector-push-extend (aref source (+ start index) ) target))
   target))
 
-(defun set-octets(start source target)
+(defun set-octets (start source target)
   (dotimes (ind (length source) )
     (let ((index (+ start ind)))
       (setf (aref target index) (aref source ind))))
