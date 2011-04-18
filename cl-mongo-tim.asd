@@ -4,15 +4,16 @@
 
 (in-package #:cl-mongo-system)
 
-(defconstant +author-string+ "Fons Haffmans <fons.haffmans@gmail.com>;
-  Duong \"Yang\" Ha Nguyen <cmpitg@gmail.com>")
+(defparameter *author-string* "Fons Haffmans
+  <fons.haffmans@gmail.com>; Duong \"Yang\" Ha Nguyen
+  <cmpitg@gmail.com>")
 
-(defconstant +version-string+ "0.7.1")
+(defparameter *version-string* "0.7.1")
 
 (asdf:defsystem cl-mongo-tim
   :name   "cl-mongo-tim"
-  :author +author-string+
-  :version +version-string+
+  :author *author-string*
+  :version *version-string*
   :licence "MIT"
   :description "A Common Lisp system to interact with MongoDB, a NoSQL
   DBS."
@@ -56,8 +57,8 @@
 
 (asdf:defsystem cl-mongo-test
   :name   "cl-mongo-tim"
-  :author +author-string+
-  :version +version-string+
+  :author *author-string*
+  :version *version-string*
   :licence "MIT"
   :description "testing cl-mongo"
   :depends-on (:cl-mongo)

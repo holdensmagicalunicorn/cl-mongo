@@ -27,21 +27,19 @@ clashed with the encoding for booleans..
 (defconstant +bson-data-min-key+      255 "bson data ultimate minimum")
 (defconstant +bson-data-max-key+      127 "bson data ultimate maximum")
 
-
-
 #|
   bson-encode encodes a complete bson object.
   It includes the obj_size at the start and the terminating null at the end.
   When creating composites these need to be skipped or removed..
 |#
 
+(defun set-array-length (array &key (start 0 start-supplied-p))
+  (let* ((head (if start-supplied-p
+                   start (fill-pointer array)))) ; save the stack pointer
+    (set-octets head (int32-to-octet (- (length array) head) ) array))) ; set length
 
-(defun set-array-length(array &key (start 0 start-supplied-p))
-  (let* ((head  (if start-supplied-p start (fill-pointer array))))      ; save the stack pointer
-    (set-octets head (int32-to-octet (- (length array) head) ) array))) ; set length    
-
-(defun null-terminate-array(array)
-  (add-octets (byte-to-octet 0) array))                       ; ending nul
+(defun make-array-null-terminated (array)
+  (add-octets (byte-to-octet 0) array))
 
 (defgeneric bson-encode(key value &key )
   (:documentation "encode a bson data element"))

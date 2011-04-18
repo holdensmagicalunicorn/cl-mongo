@@ -3,13 +3,13 @@
 ;;
 ;; This is intended to be a helper function for key-value pairs..
 ;; Here's a caveat : (kv "nested" (kv "hello" "again" (kv "678" 678)))
-;; will generate ("nested" ("hello" "again")) because kv 
-;; (kv "hello" "again" (kv "678" 678))) the third argument is ignored.
+;; will generate ("nested" ("hello" "again")) because kv (kv "hello"
+;; "again" (kv "678" 678))) the third argument is ignored.
 ;;
 ;; Basically don't use kv to construct nested conses; use list instead.
 ;;
 ;; pair  -> (string value)
-;; value -> atom | cons 
+;; value -> atom | cons
 ;; kv    -> pair | list
 ;; list  -> (elem list) | nil
 ;;
@@ -131,4 +131,3 @@ key-value pairs is saved."))
 
 (defmethod kv->ht ( (kv-container kv-container) )
   (elements (kv->doc kv-container)))
-

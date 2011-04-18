@@ -1,37 +1,44 @@
 (in-package :cl-mongo)
 
 #|
+
 A note of the bson-array design
 
-1. The encoders add the length of the element to the head of the byte stream
-   and null terminate the byte stream.
+1. The encoders add the length of the element to the head of the byte
+   stream and null terminate the byte stream.
 
-2. The array format from what I can tell is this :
-   <array length> [0 or more <bson-encoding minus header and null terminator>] <null terminator>
+2. The array format from what I can tell is this:
 
-3. That means I need to keep add/update the header with the array length and add a null terminator each
-   time the array is changed.
+   <array length> [0 or more <bson-encoding minus header and null
+   terminator>] <null terminator>
 
-4. I remove the header (which is a size) and the null terminator returned from the bson-encoding. As an
-   alternative I could change bson-encoding to not add these if this is an array element !
+3. That means I need to keep add/update the header with the array
+   length and add a null terminator each time the array is changed.
+
+4. I remove the header (which is a size) and the null terminator
+   returned from the bson-encoding. As an alternative I could change
+   bson-encoding to not add these if this is an array element !
 
 5. Make instance should produce a recognizable empty array.
 
 |#
 
-(defun make-int-vector (sz &key (init-fill 0) )
-  (make-array sz :element-type 'integer :initial-element 0 :fill-pointer init-fill :adjustable t))
+(defun make-int-vector (sz &key (init-fill 0))
+  (make-array sz
+              :element-type 'integer :initial-element 0
+              :fill-pointer init-fill :adjustable t))
 
 (defclass bson-array()
   ((array :initarg :data-array :accessor data-array)
    (index-array :initarg :index-array :accessor index-array)))
 
-;; terminate the bson array with a nul and
-;; encode the length in the first for bytes..
-
+;;;
+;;; Terminating the bson-array with a NULL and encoding the length the
+;;; first for bytes.
+;;; 
 
 (defun normalize-array(array)
-    (null-terminate-array array)
+    (make-array-null-terminated array)
     (set-array-length array :start 0))
 
 (defun normalize-bson-array(array)

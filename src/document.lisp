@@ -35,6 +35,14 @@ Accessors are:
                      :local nil :elements (make-elements size))
       (make-instance 'document :elements (make-elements size))))
 
+(defun document (&rest key/value-pair)
+  (let* ((new-doc (make-document)))
+    (loop
+      for key/value in key/value-pair
+      do (add-element )
+      ))
+  )
+
 (defgeneric add-element (key value document) 
   (:documentation "Add a pair of (key, value) to a document." ))
 
@@ -63,13 +71,13 @@ Accessors are:
 (defgeneric get-id (id) )
 
 (defmethod get-id ( (id t) )
-    id)
+  id)
 
 (defmethod get-id ( (id bson-oid) )
-    (id id))
+  (id id))
 
 (defun doc-id (doc)
-  "return the unique document id"
+  "Returns the unique id of a document."
   (get-id (_id doc)))
 
 ;;
