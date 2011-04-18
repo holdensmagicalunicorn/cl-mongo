@@ -15,14 +15,14 @@
 ;;
 
 (defstruct (pair
-	     (:conc-name pair-)
-	     (:constructor pair (key value)))
+             (:conc-name pair-)
+             (:constructor pair (key value)))
   key value)
 
 (defclass kv-container () 
   ((container :initform (make-array 2 :fill-pointer 0 :adjustable t) :accessor container)))
 
-(defmethod print-object ( (kv-container kv-container) stream)
+(defmethod print-object ((kv-container kv-container) stream)
   (format stream "kv-container : ~A " (container kv-container)))
 
 (defun make-kv-container ()
@@ -30,7 +30,7 @@
 
 (defgeneric kv-container-push (el cont))
 
-(defmethod kv-container-push ( (el t)  (kv-container kv-container) )
+(defmethod kv-container-push ((el t)  (kv-container kv-container))
   (vector-push-extend el (container kv-container)))
 
 (defgeneric kv-container-pop (cont))
@@ -62,26 +62,23 @@
 
 (defmethod kv-container-add ( (el kv-container) (kv-container kv-container) )
   (labels ((add (contb)
-	     (dotimes (index (kv-container-length contb ))
-	       (let ((el (kv-container-aref index contb)))
-		 (when el) (kv-container-push el kv-container)))
-	     kv-container))
+             (dotimes (index (kv-container-length contb ))
+               (let ((el (kv-container-aref index contb)))
+                 (when el) (kv-container-push el kv-container)))
+             kv-container))
     (add el)))
 
-(defgeneric kv (a &rest rest) 
-  (:documentation " This a helper function for key-value pairs and sets of key-value pairs.  
-In a key-value pair like (kv key value) the key has to be a string and the
-value something which is serializable. 
-key-value pairs can be combined using kv as well : (kv (kv key1 val1) (kv key2 val2)).
-This combination of key-value pairs is equivalent to a document without a unique id.
-The server will assign a unique is if a list of key-value pairs is saved."))
+(defgeneric kv (key &rest value) 
+  (:documentation "Creating key-value pairs and sets of key-value
+pairs.  If it is of the form (kv key value), the key has to be a
+string and the value something which is serializable.  key-value pairs
+can be combined using kv as well : (kv (kv key1 val1) (kv key2 val2)).
+This combination of key-value pairs is equivalent to a document
+without a unique id.  The server will assign a unique is if a list of
+key-value pairs is saved."))
 
-
-(defmethod kv ( (a (eql nil) ) &rest rest)
+(defmethod kv ((a (eql nil)) &rest rest)
   (pair nil (car rest)))
-
-;; basically b can be anything with
-;; an encoder..
 
 (defmethod kv ( (a string) &rest rest)
   (pair a (car rest)))
@@ -101,7 +98,6 @@ The server will assign a unique is if a list of key-value pairs is saved."))
     (dolist (el rest)
       (when el (kv-container-add el kvc)))
     kvc))
-    
 
 ;(kv (kv "query" (kv nil nil)) (kv "orderby" (kv "k" 1)))
 
