@@ -13,9 +13,11 @@
    :add-element
    :get-element
    :rm-element
+   :hashtable->document
    :ht->document
    :mapdoc
    :doc-id
+   :elements
 
    ;;commands
    :mongo
@@ -25,7 +27,7 @@
    :mongo-swap
    :with-mongo-connection
    :kv
-   
+
    :db.create-collection
    :db.use
    :db.insert

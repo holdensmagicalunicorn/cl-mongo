@@ -36,26 +36,26 @@ Accessors are:
       (make-instance 'document :elements (make-elements size))))
 
 (defgeneric add-element (key value document) 
-  (:documentation "Add a pair of (key, value) to a document" ))
+  (:documentation "Add a pair of (key, value) to a document." ))
 
 (defmethod add-element (key value document)
   document)
 
-(defmethod add-element ( (key string) value (document document) )
+(defmethod add-element ((key string) value (document document))
   (setf (gethash key (elements document)) value)
   (call-next-method))
 
-(defgeneric get-element ( key document) 
-  ( :documentation "Get an element identified by key from the document." ) )
+(defgeneric get-element (key document)
+  (:documentation "Get an element identified by its key."))
 
-(defmethod get-element ( (key string) (document (eql nil) ) )
+(defmethod get-element ((key string) (document (eql nil)))
   (values nil nil))
 
-(defmethod get-element ( (key string) (document document) ) 
+(defmethod get-element ((key string) (document document)) 
   (gethash key (elements document)))
 
 (defgeneric rm-element (key document) 
-  ( :documentation "Remove element identified by key from a document" ) )
+  (:documentation "Remove element identified by its key."))
 
 (defmethod rm-element ( (key string) (document document) ) 
   (remhash key (elements document)))
@@ -73,37 +73,38 @@ Accessors are:
   (get-id (_id doc)))
 
 ;;
-;; When the to-hash-able finalizer is used, embedded docs/tables in the response aren't converted
-;; to hash tables but to documents. When print-hash is used we want to see hash table like output
-;; so that's what this tries to do..
+;; When the to-hash-able finalizer is used, embedded docs/tables in
+;; the response aren't converted to hash tables but to documents.
+;; When print-hash is used we want to see hash table like output so
+;; that's what this tries to do..
 ;;
 (defun print-hash (ht stream &key (max (hash-table-count ht)))
   (labels ((prdocs (docs) 
-	     (format stream "~1,1T[")
-	     (block print-array
-	       (let ((counter 0))
-		 (dolist (doc docs)
-		   (incf counter)
-		   (if (typep doc 'document)
-		       (print-hash (elements doc) stream :max max)
-		       (format stream "~A," doc))
-		   (when (> counter 100)
-		     (progn
-		       (format stream "[....](~A elements left)" (- (length docs) 100))
-		       (return-from print-array nil))))))
-	     (format stream "]~%"))
-	   (vpr (v)
-	     (cond ( (typep v 'cons)     (prdocs v)        )
-		   ( (typep v 'document) (prdocs (list v)) )
-		   (  t                  (format stream "~A~%" v)))))
+             (format stream "~1,1T[")
+             (block print-array
+               (let ((counter 0))
+                 (dolist (doc docs)
+                   (incf counter)
+                   (if (typep doc 'document)
+                       (print-hash (elements doc) stream :max max)
+                       (format stream "~A," doc))
+                   (when (> counter 100)
+                     (progn
+                       (format stream "[....](~A elements left)" (- (length docs) 100))
+                       (return-from print-array nil))))))
+             (format stream "]~%"))
+           (vpr (v)
+             (cond ( (typep v 'cons)     (prdocs v)        )
+                   ( (typep v 'document) (prdocs (list v)) )
+                   (  t                  (format stream "~A~%" v)))))
     (format stream "~%~3,8T{~%") 
     (with-hash-table-iterator (iterator ht)
       (dotimes (repeat max)
-	(multiple-value-bind (exists-p key value) (iterator)
-	  (if exists-p 
-	      (progn 
-		(format stream "~3,8T~A -> " key) 
-		(vpr value))))))
+        (multiple-value-bind (exists-p key value) (iterator)
+          (if exists-p 
+              (progn 
+                (format stream "~3,8T~A -> " key) 
+                (vpr value))))))
     (when (< max (hash-table-count ht)) (format stream "~3,8T[..............]~%"))
     (format stream "~3,8T}~%")))
 
@@ -115,10 +116,10 @@ Accessors are:
 	  (if exists-p (push key lst)))))
     (nreverse lst)))
 
-
-;
-; suppress the printing of the object id if the objectis locally generated
-;
+;;;
+;;; suppress the printing of the object id if the objectis locally
+;;; generated
+;;;
 
 (defmethod describe-object ((document document) stream)
   (format stream "~%{  ~S ~%" (type-of document) ) 
@@ -154,6 +155,8 @@ Accessors are:
   (let ((str (with-output-to-string (stream) (print-object.1 document stream))))
     (format stream "~A~%" str)))
 
+(defun hashtable->document (ht)
+  (ht->document ht))
 
 (defun ht->document (ht) 
   "Convert a hash-table to a document."
@@ -161,30 +164,26 @@ Accessors are:
     (let ((doc (make-document :oid (if oid-supplied oid nil))))
       (when oid-supplied (remhash "_id" ht))
       (with-hash-table-iterator (iterator ht)
-	(dotimes (repeat (hash-table-count ht))
-	  (multiple-value-bind (exists-p key value) (iterator)
-	    (if exists-p (add-element key value doc)))))
+        (dotimes (repeat (hash-table-count ht))
+          (multiple-value-bind (exists-p key value) (iterator)
+            (if exists-p (add-element key value doc)))))
       doc)))
-;;------------
-
 
 (defun ht->document.1 (ht) 
   (multiple-value-bind (oid oid-supplied) (gethash "_id" ht)
-      (if oid-supplied
-	  (progn 
-	    (remhash "_id" ht)
-	    (make-instance 'document :oid oid :local nil :elements ht))
-	  (make-instance 'document :elements ht))))
-
-;;--------------------
+    (if oid-supplied
+        (progn 
+          (remhash "_id" ht)
+          (make-instance 'document :oid oid :local nil :elements ht))
+        (make-instance 'document :elements ht))))
 
 (defun mapdoc (fn document)
   (let ((lst ())
-	(ht (elements document)))
+        (ht (elements document)))
     (with-hash-table-iterator (iterator ht)
       (dotimes (repeat (hash-table-count ht))
-	(multiple-value-bind (exists-p key value) (iterator)
-	  (if exists-p (push (funcall fn key value) lst)))))
+        (multiple-value-bind (exists-p key value) (iterator)
+          (if exists-p (push (funcall fn key value) lst)))))
     (nreverse lst)))
 	       
 (defgeneric doc-elements (document) )
@@ -199,8 +198,6 @@ Accessors are:
 
 (defmethod doc-elements ( (document document) )
   (doc-elements (elements document)))
-
-;;----------------------------
 
 (defun ht-test (size)
   (let ((ht (make-hash-table :test #'equal)))

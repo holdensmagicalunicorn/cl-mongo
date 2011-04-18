@@ -126,14 +126,15 @@
     (set-octets 0 (int32-to-octet (length arr) ) arr)      ; set message length
     arr))
 
-(defgeneric mongo-reply (array)
+(defgeneric mongo-reply (array &key finalize)
   (:documentation "Extracting reply parameters"))
 
-;; (defmethod mongo-reply ((array (eql nil)) &key finalize)
-;;   (declare (ignore finalize))
-;;   nil)
+(defmethod mongo-reply ((array (eql nil)) &key finalize)
+  (declare (ignore finalize))
+  nil)
 
-(defun mongo-reply (array)
+(defun mongo-reply (array &key finalize)
+  (declare (ignore finalize))
   (labels ((header (array)
              (let ((lst ()))
                (push (octet-to-int32.1 array 0)   lst) ; length
@@ -147,8 +148,6 @@
                (nreverse lst))))
     (let ((head (header array)))
       (values head  (bson-decode (car head) 36 (nth 7 head)  array)))))
-
-
 
 (defgeneric mongo-delete (collection object) 
   (:documentation "delete a mongo object"))
