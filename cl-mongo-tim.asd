@@ -55,7 +55,7 @@
    (:static-file "COPYING")))
 
 (asdf:defsystem cl-mongo-test
-  :name   "cl-mongo"
+  :name   "cl-mongo-tim"
   :author +author-string+
   :version +version-string+
   :licence "MIT"

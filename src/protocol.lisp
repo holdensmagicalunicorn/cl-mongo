@@ -126,25 +126,25 @@
     (set-octets 0 (int32-to-octet (length arr) ) arr)      ; set message length
     arr))
 
-(defgeneric mongo-reply (array &key finalize) 
-  (:documentation "extract reply parameters"))
+(defgeneric mongo-reply (array)
+  (:documentation "Extracting reply parameters"))
 
-(defmethod mongo-reply ( (array (eql nil) ) &key finalize)
-  (declare (ignore finalize))
-  )
+;; (defmethod mongo-reply ((array (eql nil)) &key finalize)
+;;   (declare (ignore finalize))
+;;   nil)
 
-(defun mongo-reply ( array )
+(defun mongo-reply (array)
   (labels ((header (array)
-	     (let ((lst ()))
-	       (push (octet-to-int32.1 array 0)   lst)   ; length
-	       (push (octet-to-int32.1 array 4)   lst)   ; request id
-	       (push (octet-to-int32.1 array 8)   lst)   ; response to
-	       (push (octet-to-int32.1 array 12)  lst)   ; opcode
-	       (push (octet-to-int32.1 array 16)  lst)   ; response flag
-	       (push (octet-to-int64.1 array 20)  lst)   ; cursor id
-	       (push (octet-to-int32.1 array 28)  lst)   ; starting from
-	       (push (octet-to-int32.1 array 32)  lst)   ; returned
-	       (nreverse lst))))
+             (let ((lst ()))
+               (push (octet-to-int32.1 array 0)   lst) ; length
+               (push (octet-to-int32.1 array 4)   lst) ; request id
+               (push (octet-to-int32.1 array 8)   lst) ; response to
+               (push (octet-to-int32.1 array 12)  lst) ; opcode
+               (push (octet-to-int32.1 array 16)  lst) ; response flag
+               (push (octet-to-int64.1 array 20)  lst) ; cursor id
+               (push (octet-to-int32.1 array 28)  lst) ; starting from
+               (push (octet-to-int32.1 array 32)  lst) ; returned
+               (nreverse lst))))
     (let ((head (header array)))
       (values head  (bson-decode (car head) 36 (nth 7 head)  array)))))
 
@@ -168,4 +168,3 @@
 
 (defmethod mongo-delete ( (collection string) (object document) )
   (mongo-delete collection (bson-encode "_id" (_id object)))) ; encode unique id 
-
