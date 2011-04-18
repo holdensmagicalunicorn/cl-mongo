@@ -19,18 +19,21 @@
              (:constructor pair (key value)))
   key value)
 
-(defclass kv-container () 
-  ((container :initform (make-array 2 :fill-pointer 0 :adjustable t) :accessor container)))
+(defclass kv-container ()
+  ((container :initform (make-array 2 :fill-pointer 0 :adjustable t)
+              :accessor container)))
 
-(defmethod print-object ((kv-container kv-container) stream)
-  (format stream "kv-container : ~A " (container kv-container)))
+(defmethod print-object ((kv-container kv-container)
+                         stream)
+  (format stream "kv-container: ~A" (container kv-container)))
 
 (defun make-kv-container ()
-  (make-instance 'kv-container ))
+  (make-instance 'kv-container))
 
-(defgeneric kv-container-push (el cont))
+(defgeneric kv-container-push (element container)
+  (:documentation "Add an element to a container."))
 
-(defmethod kv-container-push ((el t)  (kv-container kv-container))
+(defmethod kv-container-push ((el t) (kv-container kv-container))
   (vector-push-extend el (container kv-container)))
 
 (defgeneric kv-container-pop (cont))
@@ -54,10 +57,10 @@
   (let (( pair (kv-container-aref index kv-container)))
     (values (pair-key pair) (pair-value pair))))
 
-(defgeneric kv-container-add (el container))
+(defgeneric kv-container-add (element container))
 
-(defmethod kv-container-add ( (el pair) (kv-container kv-container) )
-  (kv-container-push el kv-container)
+(defmethod kv-container-add ((element pair) (kv-container kv-container) )
+  (kv-container-push element kv-container)
   kv-container)
 
 (defmethod kv-container-add ( (el kv-container) (kv-container kv-container) )
@@ -71,33 +74,32 @@
 (defgeneric kv (key &rest value) 
   (:documentation "Creating key-value pairs and sets of key-value
 pairs.  If it is of the form (kv key value), the key has to be a
-string and the value something which is serializable.  key-value pairs
-can be combined using kv as well : (kv (kv key1 val1) (kv key2 val2)).
-This combination of key-value pairs is equivalent to a document
-without a unique id.  The server will assign a unique is if a list of
-key-value pairs is saved."))
+string and the value something serializable.  key-value pairs can be
+combined using kv as well: (kv (kv key1 val1) (kv key2 val2)).  This
+combination of key-value pairs is equivalent to a document without a
+unique id.  The server will assign a unique is if a list of key-value
+pairs is saved."))
 
-(defmethod kv ((a (eql nil)) &rest rest)
-  (pair nil (car rest)))
+(defmethod kv ((key (eql nil)) &rest value)
+  (pair nil (car value)))
 
-(defmethod kv ( (a string) &rest rest)
-  (pair a (car rest)))
+(defmethod kv ((key string) &rest value)
+  (pair key value))
 
-(defmethod kv ( (a symbol) &rest rest)
-  (declare (ignore rest))
-  (pair (string-downcase a) (car rest)))
+(defmethod kv ((key symbol) &rest value
+               )
+  (pair (string-downcase key) &rest value))
 
-(defmethod kv ( (kv-container kv-container) &rest rest )
-  (dolist (el rest)
-    (when el (kv-container-add el kv-container)))
+(defmethod kv ((kv-container kv-container) &rest value)
+  (kv-container-add value kv-container)
   kv-container)
 
-(defmethod kv ( (a pair) &rest rest)
-  (let ((kvc (make-kv-container) ))
-    (kv-container-add a kvc)
-    (dolist (el rest)
-      (when el (kv-container-add el kvc)))
-    kvc))
+;; (defmethod kv ((a pair) &rest rest)
+;;   (let ((kvc (make-kv-container) ))
+;;     (kv-container-add a kvc)
+;;     (dolist (el rest)
+;;       (when el (kv-container-add el kvc)))
+;;     kvc))
 
 ;(kv (kv "query" (kv nil nil)) (kv "orderby" (kv "k" 1)))
 
