@@ -40,6 +40,47 @@
                                  (pair-value current-pair))))
     current-pair))
 
+(defclass mongo-document ()
+  ((elements :accessor document-elements
+             :initform (make-array 0
+                                   :adjustable t
+                                   :fill-pointer 0
+                                   :element-type 'mongo-pair))))
+
+(defgeneric add-element (document element)
+  (:documentation "Add an element to a document."))
+
+(defmethod add-element ((doc mongo-document) (pair mongo-pair))
+  ;; Add if and only if the pair has not yet existed
+  (if (not (element-exists? doc pair))
+      (vector-push-extend pair (document-elements doc))
+      nil))
+
+(defun element-exists? (document pair)
+  "Check if an element (pair) exists in a document."
+  (if (get-element document pair)
+      t
+      nil))
+
+(defun make-document (&rest pair-list)
+  "Create a mongo-document with the specified list of pairs."
+  (let* ((doc (make-instance 'mongo-document)))
+      (loop
+         for pair in pair-list
+         do (add-element doc pair))
+      doc))
+
+(defgeneric get-element (document element)
+  (:documentation "Get a value of an element from a document."))
+
+(defmethod get-element ((document mongo-document) element)
+  (let ((result (find-if #'(lambda (x)
+                             (equal element (pair-key x)))
+                         (document-elements document))))
+    (if result
+        (pair-value result)
+        nil)))
+
 ;;;
 ;;; Simplified helper functions
 ;;;

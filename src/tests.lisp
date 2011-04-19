@@ -26,5 +26,11 @@
     (assert-equal "person_1" (get-pair-slot complex-pair 2 1))
     (assert-equal "data" (get-pair-slot complex-pair 2 2 1))))
 
+(define-test make-document
+  (let* ((doc-1 (make-document (m-pair "hello" "world")
+                               (m-pair "the" "World"))))
+   (assert-equal "world" (get-element doc-1 "hello"))
+   (assert-equal "World" (get-element doc-1 "the"))))
+
 (defun test-cl-mongo-tim ()
   (run-all-tests :cl-mongo-tim))
