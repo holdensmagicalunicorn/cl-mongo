@@ -14,7 +14,7 @@
   (:documentation "Pretty print a mongo object."))
 
 (defmethod mongo-print ((pair mongo-pair) &optional (stream *standard-output*))
-  (format stream "~A, ~A"
+  (format stream "(~A : ~A)"
           (mongo-print (pair-key pair) nil)
           (mongo-print (pair-value pair) nil)))
 
@@ -22,6 +22,10 @@
                         &optional (stream *standard-output*))
   (let ((*print-escape* t))
     (format stream "~S" a-string)))
+
+(defmethod mongo-print ((an-int integer)
+                        &optional (stream *standard-output*))
+  (format stream "~A" an-int))
 
 (defun get-pair-slot (pair &rest slot-positions)
   "Get direct key/value of a pair based on its level/position.  For

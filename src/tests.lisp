@@ -12,8 +12,11 @@
     (assert-equal "bad!" (pair-value (pair-value simplified-pair)))))
 
 (define-test print-pair
-  (let* ((pair-1 (make-pair "hello" "world")))
-    (assert-equal "\"hello\", \"world\"" (mongo-print pair-1 nil))))
+  (let* ((pair-1 (make-pair "hello" "world"))
+         (simplified-pair (m-pair "abc" (m-pair "aoeu" 1))))
+    (assert-equal "(\"hello\" : \"world\")" (mongo-print pair-1 nil))
+    (assert-equal "(\"abc\" : (\"aoeu\" : 1))"
+                  (mongo-print simplified-pair nil))))
 
 (define-test get-pair-slot
   (let* ((complex-pair (m-pair "comments" (m-pair "person_1"
