@@ -21,7 +21,20 @@
 (defmethod mongo-print ((a-string string)
                         &optional (stream *standard-output*))
   (let ((*print-escape* t))
-    (format stream "~S" a-string)))h
+    (format stream "~S" a-string)))
+
+(defun get-pair-slot (pair &rest slot-positions)
+  "Get direct key/value of a pair based on its level/position.  For
+  example:
+
+``(get-pair-slot (m-pair \"Hell\" (m-pair \"world\" 10)) 2 2) => 10``"
+  (let ((current-pair pair))
+    (loop
+       for slot-pos in slot-positions
+       do (setf current-pair (if (= 1 slot-pos)
+                                 (pair-key current-pair)
+                                 (pair-value current-pair))))
+    current-pair))
 
 ;;;
 ;;; Simplified helper functions

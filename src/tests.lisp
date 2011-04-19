@@ -9,15 +9,19 @@
     (assert-equal "abc" (pair-key compound-pair))
     (assert-equal "1" (pair-key (pair-value compound-pair)))
     (assert-equal 2 (pair-value (pair-value compound-pair)))
-    (assert-equal "bad!" (pair-value (pair-value simplified-pair))))
-
-  )
+    (assert-equal "bad!" (pair-value (pair-value simplified-pair)))))
 
 (define-test print-pair
   (let* ((pair-1 (make-pair "hello" "world")))
-    (assert-equal "\"hello\", \"world\"" (mongo-print pair-1 nil))
-    )
-  )
+    (assert-equal "\"hello\", \"world\"" (mongo-print pair-1 nil))))
+
+(define-test get-pair-slot
+  (let* ((complex-pair (m-pair "comments" (m-pair "person_1"
+                                                  (m-pair "data"
+                                                          "No comments")))))
+    (assert-equal "comments" (get-pair-slot complex-pair 1))
+    (assert-equal "person_1" (get-pair-slot complex-pair 2 1))
+    (assert-equal "data" (get-pair-slot complex-pair 2 2 1))))
 
 (defun test-cl-mongo-tim ()
   (run-all-tests :cl-mongo-tim))
